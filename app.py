@@ -1,5 +1,3 @@
-import spacy
-nlp = spacy.load("tr_core_news_sm")
 import streamlit as st
 import pandas as pd
 import PyPDF2
@@ -34,16 +32,12 @@ def cv_metnini_oku(pdf_file):
     except:
         return "CV okunamadı!"
 
-# Analiz Fonksiyonu (AI Destekli)
+# Analiz Fonksiyonu (Basit)
 def cv_analiz_et(cv_metni, kriterler, min_deneyim):
     puan = 0
     bulunanlar = []
     eksikler = []
     
-    # AI ile metni işle
-    doc = nlp(cv_metni)
-    
-    # Yetenek Eşleşmesi (AI ile)
     for kriter in kriterler:
         if kriter.lower() in cv_metni.lower():
             puan += 10
@@ -51,15 +45,12 @@ def cv_analiz_et(cv_metni, kriterler, min_deneyim):
         else:
             eksikler.append(kriter)
     
-    # Deneyim Kontrolü (AI ile)
     if "yıl" in cv_metni.lower():
         puan += 15
     else:
         puan -= 5
     
-    # Toplam Puan (Maksimum 100)
     toplam_puan = min(puan, 100)
-    
     return toplam_puan, bulunanlar, eksikler
 
 # Uygulama Akışı
@@ -100,4 +91,5 @@ else:
     st.info("👈 Sol menüden kriterleri seçin ve CV yükleyin!")
 
 st.markdown("---")
+
 st.markdown("© 2024 Akıllı CV Analiz Sistemi - Yapay Zeka Destekli")
