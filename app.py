@@ -12,7 +12,7 @@ st.markdown("CV'nizi yükleyin, sistem puanlasın!")
 st.sidebar.header("📋 Şirket Kriterleri")
 aranan_kriterler = st.sidebar.multiselect(
     "Aranan Yetenekler",
-    ["Python", "Java", "SQL", "C#", "JavaScript", "AWS", "Docker", "Liderlik", "İngilizce"],
+    ["Python", "Java", "SQL", "C#", "JavaScript", "AWS", "Docker", "Liderlik", "İngilizce", "github","itü"],
     default=["Python", "SQL"]
 )
 
@@ -93,3 +93,4 @@ else:
 st.markdown("---")
 
 st.markdown("© 2024 Akıllı CV Analiz Sistemi - Yapay Zeka Destekli")
+
