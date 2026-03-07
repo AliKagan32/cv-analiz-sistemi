@@ -1,5 +1,3 @@
-import spacy
-nlp = spacy.load("tr_core_news_sm")
 import streamlit as st
 import pandas as pd
 import PyPDF2
