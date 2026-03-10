@@ -5,7 +5,7 @@ import PyPDF2
 # Sayfa Ayarları
 st.set_page_config(page_title="Akıllı CV Analiz", layout="wide")
 
-st.title("🚀 Akıllı CV Analiz ve Puanlama Sistemi")
+st.title(" Akıllı CV Analiz ve Puanlama Sistemi")
 st.markdown("CV'nizi yükleyin, sistem puanlasın!")
 
 # Şirket Kriterleri
