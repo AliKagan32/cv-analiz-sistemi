@@ -122,34 +122,24 @@ def cv_analiz_et(cv_metni, kriterler, min_deneyim):
     toplam_puan = min(round(puan), 100)
     return toplam_puan, bulunanlar, eksikler
 
-    # Yetenek Eşleşmesi
+    # Beceri Eşleşmesi (%50 ağırlıklı)
+    beceri_puan = 0
     for kriter in kriterler:
         if kriter.lower() in cv_metni_kucuk:
-            puan += 10
+            beceri_puan += 10
             bulunanlar.append(kriter)
         else:
+            # Sadece o kritere ait eşdeğerleri ara
+            kriter_kucuk = kriter.lower()
             esitlendi = False
-            for anahtar, esdegerler in benzerlik_tablosu.items():
+            if kriter_kucuk in benzerlik_tablosu:
+                esdegerler = benzerlik_tablosu[kriter_kucuk]
                 if any(esdeger in cv_metni_kucuk for esdeger in esdegerler):
-                    puan += 8
+                    beceri_puan += 8
                     bulunanlar.append(f"{kriter} (AI)")
                     esitlendi = True
-                    break
             if not esitlendi:
                 eksikler.append(kriter)
-
-    # Yıl Algılama
-    yil_varyasyonlari = ["yıl", "yil", "year", "yıllık", "deneyim"]
-    yil_bulundu = any(varyasyon in cv_metni_kucuk for varyasyon in yil_varyasyonlari)
-    rakamlar = re.findall(r'\d+', cv_metni)
-
-    if yil_bulundu or len(rakamlar) > 0:
-        puan += 15
-    else:
-        puan -= 5
-
-    toplam_puan = min(puan, 100)
-    return toplam_puan, bulunanlar, eksikler, yil_bulundu, rakamlar  # ✅ Düzeltme 3: 5 değer döndürülüyor
 
 # Uygulama Akışı
 if uploaded_file is not None:
