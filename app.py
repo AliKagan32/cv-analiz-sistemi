@@ -1,6 +1,7 @@
 import streamlit as st
 import pandas as pd
 import PyPDF2
+import re
 
 # Sayfa Ayarları
 st.set_page_config(page_title="Akıllı CV Analiz", layout="wide")
@@ -38,43 +39,54 @@ def cv_analiz_et(cv_metni, kriterler, min_deneyim):
     bulunanlar = []
     eksikler = []
     
-    # AI Benzerlik Tablosu (Akıllı Eşleştirme)
+    # AI Benzerlik Tablosu
     benzerlik_tablosu = {
-    "backend": ["backend", "arka uç", "arka plan"],
-    "frontend": ["frontend", "ön uç", "ön yüz"],
-    "veritabanı": ["veritabanı", "database", "db"],
-    "bulut": ["aws", "docker", "kubernetes", "k8s"],
-    "liderlik": ["lider", "yönetim", "manager"]
-}
+        "backend": ["backend", "arka uç", "arka plan"],
+        "frontend": ["frontend", "ön uç", "ön yüz"],
+        "veritabanı": ["veritabanı", "database", "db"],
+        "bulut": ["aws", "docker", "kubernetes"],
+        "liderlik": ["lider", "yönetim", "manager"]
+    }
     
     cv_metni_kucuk = cv_metni.lower()
     
-    # Anahtar Kelime Eşleşmesi
+    # Anahtar Kelime + AI Eşleşmesi
     for kriter in kriterler:
         if kriter.lower() in cv_metni_kucuk:
             puan += 10
             bulunanlar.append(kriter)
         else:
-            # AI Benzerlik Kontrolü
             esitlendi = False
             for anahtar, esdegerler in benzerlik_tablosu.items():
                 if anahtar in cv_metni_kucuk and any(esdeger in cv_metni_kucuk for esdeger in esdegerler):
-                    puan += 8  # Kısmi puan
+                    puan += 8
                     bulunanlar.append(f"{kriter} (AI)")
                     esitlendi = True
                     break
             if not esitlendi:
                 eksikler.append(kriter)
     
-    # Deneyim Kontrolü
-    if "yıl" in cv_metni_kucuk:
+    # Geliştirilmiş Yıl Algılama
+    yil_varyasyonlari = ["yıl", "yil", "year", "yıllık", "deneyim"]
+    yil_bulundu = False
+    
+    for varyasyon in yil_varyasyonlari:
+        if varyasyon in cv_metni_kucuk:
+            yil_bulundu = True
+            break
+    
+    # Rakam kontrolü (1 yıl, 3 yıl)
+    rakamlar = re.findall(r'\d+', cv_metni)
+    if len(rakamlar) > 0:
+        yil_bulundu = True
+    
+    if yil_bulundu:
         puan += 15
     else:
         puan -= 5
     
     toplam_puan = min(puan, 100)
     return toplam_puan, bulunanlar, eksikler
-
 # Uygulama Akışı
 if uploaded_file is not None:
     st.success("✅ CV Başarıyla Yüklendi!")
