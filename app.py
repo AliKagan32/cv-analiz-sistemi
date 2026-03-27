@@ -63,7 +63,7 @@ def cv_analiz_et(cv_metni, kriterler, min_deneyim):
 
     beceri_puan = 0
     for kriter in kriterler:
-        if kriter.lower() in cv_metni_kucuk:
+        if re.search(r'\b' + re.escape(kriter.lower()) + r'\b', cv_metni_kucuk):
             beceri_puan += 10
             bulunanlar.append(kriter)
         else:
