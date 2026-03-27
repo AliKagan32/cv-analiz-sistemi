@@ -59,7 +59,20 @@ def cv_analiz_et(cv_metni, kriterler, min_deneyim):
     # Beceri Eşleşmesi (%50 ağırlıklı)
     beceri_puan = 0
     for kriter in kriterler:
-        st.write(f"Aranan: {kriter} | CV'de var mı: {kriter.lower() in cv_metni_kucuk}")
+        if re.search(r'\b' + re.escape(kriter.lower()) + r'\b', cv_metni_kucuk):
+            beceri_puan += 10
+            bulunanlar.append(kriter)
+        else:
+            kriter_kucuk = kriter.lower()
+            esitlendi = False
+            if kriter_kucuk in benzerlik_tablosu:
+                esdegerler = benzerlik_tablosu[kriter_kucuk]
+                if any(esdeger in cv_metni_kucuk for esdeger in esdegerler):
+                    beceri_puan += 8
+                    bulunanlar.append(f"{kriter} (AI)")
+                    esitlendi = True
+            if not esitlendi:
+                eksikler.append(kriter)
 
     beceri_puan = 0
     for kriter in kriterler:
