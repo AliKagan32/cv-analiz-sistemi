@@ -81,6 +81,9 @@ def cv_analiz_et(cv_metni, kriterler, min_deneyim):
 
 # Uygulama Akışı
 if uploaded_file is not None:
+    with st.expander("📄 PDF İçeriğini Görüntüle"):
+        cv_metni = cv_metnini_oku(uploaded_file)
+        st.text(cv_metni)
     st.success("✅ CV Başarıyla Yüklendi!")
     cv_metni = cv_metnini_oku(uploaded_file)
 
