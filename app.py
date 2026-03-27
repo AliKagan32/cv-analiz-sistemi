@@ -159,7 +159,7 @@ if uploaded_file is not None:
     st.success("✅ CV Başarıyla Yüklendi!")
     cv_metni = cv_metnini_oku(uploaded_file)
 
-    puan, bulunanlar, eksikler, yil_bulundu, rakamlar = cv_analiz_et(cv_metni, aranan_kriterler, min_deneyim)
+    puan, bulunanlar, eksikler = cv_analiz_et(cv_metni, aranan_kriterler, min_deneyim)
 
     st.markdown("### 📊 Analiz Sonuçları")
     col1, col2, col3 = st.columns(3)
