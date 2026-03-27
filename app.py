@@ -41,16 +41,16 @@ def cv_analiz_et(cv_metni, kriterler, min_deneyim):
     
     # AI Benzerlik Tablosu
     benzerlik_tablosu = {
-        "backend": ["backend", "arka uç", "arka plan"],
-        "frontend": ["frontend", "ön uç", "ön yüz"],
-        "veritabanı": ["veritabanı", "database", "db"],
-        "bulut": ["aws", "docker", "kubernetes"],
-        "liderlik": ["lider", "yönetim", "manager"]
+        "backend": ["backend", "arka uç"],
+        "frontend": ["frontend", "ön uç"],
+        "veritabanı": ["veritabanı", "database"],
+        "bulut": ["aws", "docker"],
+        "liderlik": ["lider", "yönetim"]
     }
     
     cv_metni_kucuk = cv_metni.lower()
     
-    # Anahtar Kelime + AI Eşleşmesi
+    # Yetenek Eşleşmesi
     for kriter in kriterler:
         if kriter.lower() in cv_metni_kucuk:
             puan += 10
@@ -58,26 +58,30 @@ def cv_analiz_et(cv_metni, kriterler, min_deneyim):
         else:
             esitlendi = False
             for anahtar, esdegerler in benzerlik_tablosu.items():
-                if anahtar in cv_metni_kucuk and any(esdeger in cv_metni_kucuk for esdeger in esdegerler):
-                    puan += 8
-                    bulunanlar.append(f"{kriter} (AI)")
-                    esitlendi = True
-                    break
+                if anahtar in cv_metni_kucuk:
+                    for esdeger in esdegerler:
+                        if esdeger in cv_metni_kucuk:
+                            puan += 8
+                            bulunanlar.append(f"{kriter} (AI)")
+                            esitlendi = True
+                            break
+                    if esitlendi:
+                        break
             if not esitlendi:
                 eksikler.append(kriter)
     
-        # Geliştirilmiş Yıl Algılama (Görünür)
+    # Yıl Algılama (Sadece hesaplama)
     yil_varyasyonlari = ["yıl", "yil", "year", "yıllık", "deneyim"]
     yil_bulundu = any(varyasyon in cv_metni_kucuk for varyasyon in yil_varyasyonlari)
-    
     rakamlar = re.findall(r'\d+', cv_metni)
     
-    if yil_bulundu:
-        st.success(f"✅ {len(rakamlar)} yıl deneyim algılandı! (+15 puan)")
+    if yil_bulundu or len(rakamlar) > 0:
         puan += 15
     else:
-        st.error("❌ Deneyim algılanmadı! (-5 puan)")
         puan -= 5
+    
+    toplam_puan = min(puan, 100)
+    return toplam_puan, bulunanlar, eksikler, yil_bulundu, rakamlar
 # Uygulama Akışı
 if uploaded_file is not None:
     st.success("✅ CV Başarıyla Yüklendi!")
@@ -101,7 +105,13 @@ if uploaded_file is not None:
     st.write(f"**Rakamlar bulundu:** {rakamlar}")
     st.write("---")
 
-    puan, bulunanlar, eksikler = cv_analiz_et(cv_metni, aranan_kriterler, min_deneyim)
+        puan, bulunanlar, eksikler, yil_bulundu, rakamlar = cv_analiz_et(cv_metni, aranan_kriterler, min_deneyim)
+    
+    # Yıl durumu göster
+    if yil_bulundu or len(rakamlar) > 0:
+        st.success(f"✅ {len(rakamlar)} yıl deneyim algılandı! (+15 puan)")
+    else:
+        st.warning("⚠️ Deneyim bilgisi eksik (-5 puan)")
 
     st.markdown("### 📊 Analiz Sonuçları")
     col1, col2, col3 = st.columns(3)
