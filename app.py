@@ -94,7 +94,7 @@ if uploaded_file is not None:
     
     with st.expander("CV İçeriğini Görüntüle"):
         st.text(cv_metni[:500] + "...")
-        cv_metni = cv_metnini_oku(upload_file)
+        cv_metni = cv_metnini_oku(uploaded_file)
     # DEBUG: Yıl algılama testi
     st.markdown("### 🔍 DEBUG BİLGİLERİ")
     st.write("**CV Metni (İlk 200 karakter):**")
