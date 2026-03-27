@@ -77,13 +77,12 @@ def cv_analiz_et(cv_metni, kriterler, min_deneyim):
     
     # Rakam kontrolü (1 yıl, 3 yıl)
     rakamlar = re.findall(r'\d+', cv_metni)
-    if len(rakamlar) > 0:
-        yil_bulundu = True
-    
     if yil_bulundu:
-        puan += 15
-    else:
-        puan -= 5
+    st.success(f"✅ {len(rakamlar)} yıl deneyim algılandı! (+15 puan)")
+    puan += 15
+else:
+    st.error("❌ Deneyim algılanmadı! (-5 puan)")
+    puan -= 5
     
     toplam_puan = min(puan, 100)
     return toplam_puan, bulunanlar, eksikler
