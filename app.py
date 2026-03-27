@@ -87,8 +87,6 @@ if uploaded_file is not None:
     st.success("✅ CV Başarıyla Yüklendi!")
     cv_metni = cv_metnini_oku(uploaded_file)
 
-    # ✅ PDF içeriği buraya ekleniyor
-    st.text_area("📄 PDF İçeriği", cv_metni, height=200)
     puan, bulunanlar, eksikler, yil_bulundu, rakamlar = cv_analiz_et(cv_metni, aranan_kriterler, min_deneyim)
 
     st.markdown("### 📊 Analiz Sonuçları")
