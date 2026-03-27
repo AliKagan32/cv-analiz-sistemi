@@ -39,7 +39,6 @@ def cv_analiz_et(cv_metni, kriterler, min_deneyim):
     bulunanlar = []
     eksikler = []
 
-    # ✅ Düzeltme 1: Duplicate key'ler kaldırıldı
     benzerlik_tablosu = {
         "backend": ["backend", "arka uç", "arka plan"],
         "frontend": ["frontend", "ön uç", "ön yüz"],
@@ -49,6 +48,79 @@ def cv_analiz_et(cv_metni, kriterler, min_deneyim):
     }
 
     cv_metni_kucuk = cv_metni.lower()
+
+    # ✅ YENİ 2: Ağırlıklı Puanlama
+    agirliklar = {
+        "beceri": 0.50,   # %50
+        "deneyim": 0.20,  # %20
+        "egitim": 0.20,   # %20
+        "diger": 0.10     # %10
+    }
+
+    # Beceri Eşleşmesi (%50 ağırlıklı)
+    beceri_puan = 0
+    for kriter in kriterler:
+        if kriter.lower() in cv_metni_kucuk:
+            beceri_puan += 10
+            bulunanlar.append(kriter)
+        else:
+            esitlendi = False
+            for anahtar, esdegerler in benzerlik_tablosu.items():
+                if any(esdeger in cv_metni_kucuk for esdeger in esdegerler):
+                    beceri_puan += 8
+                    bulunanlar.append(f"{kriter} (AI)")
+                    esitlendi = True
+                    break
+            if not esitlendi:
+                eksikler.append(kriter)
+
+    max_beceri = len(kriterler) * 10 if kriterler else 1
+    puan += (beceri_puan / max_beceri) * 100 * agirliklar["beceri"]
+
+    # Deneyim Puanı (%20 ağırlıklı)
+    yil_varyasyonlari = ["yıl", "yil", "year", "yıllık", "deneyim"]
+    yil_bulundu = any(v in cv_metni_kucuk for v in yil_varyasyonlari)
+    rakamlar = re.findall(r'\d+', cv_metni)
+    yillar = [int(r) for r in rakamlar if 1 <= int(r) <= 40]
+    max_yil = max(yillar) if yillar else 0
+
+    if yil_bulundu and max_yil >= min_deneyim:
+        deneyim_puan = 100
+    elif yil_bulundu and max_yil > 0:
+        deneyim_puan = (max_yil / min_deneyim) * 100 if min_deneyim > 0 else 50
+    else:
+        deneyim_puan = 0
+
+    puan += min(deneyim_puan, 100) * agirliklar["deneyim"]
+
+    # ✅ YENİ 3: Eğitim Analizi (%20 ağırlıklı)
+    egitim_puan = 0
+
+    dereceler = {
+        "doktora": 100,
+        "phd": 100,
+        "yüksek lisans": 80,
+        "master": 80,
+        "msc": 80,
+        "lisans": 60,
+        "bachelor": 60,
+        "üniversite": 50,
+        "university": 50,
+        "önlisans": 30,
+        "associate": 30,
+    }
+
+    for derece, skor in dereceler.items():
+        if derece in cv_metni_kucuk:
+            egitim_puan = max(egitim_puan, skor)  # en yüksek bulunan derece
+
+    puan += egitim_puan * agirliklar["egitim"]
+
+    # Diğer (%10 sabit bonus)
+    puan += 100 * agirliklar["diger"]
+
+    toplam_puan = min(round(puan), 100)
+    return toplam_puan, bulunanlar, eksikler
 
     # Yetenek Eşleşmesi
     for kriter in kriterler:
