@@ -66,26 +66,18 @@ def cv_analiz_et(cv_metni, kriterler, min_deneyim):
             if not esitlendi:
                 eksikler.append(kriter)
     
-    # Geliştirilmiş Yıl Algılama
+        # Geliştirilmiş Yıl Algılama (Görünür)
     yil_varyasyonlari = ["yıl", "yil", "year", "yıllık", "deneyim"]
-    yil_bulundu = False
+    yil_bulundu = any(varyasyon in cv_metni_kucuk for varyasyon in yil_varyasyonlari)
     
-    for varyasyon in yil_varyasyonlari:
-        if varyasyon in cv_metni_kucuk:
-            yil_bulundu = True
-            break
-    
-    # Rakam kontrolü (1 yıl, 3 yıl)
     rakamlar = re.findall(r'\d+', cv_metni)
-    if yil_bulundu:
-    st.success(f"✅ {len(rakamlar)} yıl deneyim algılandı! (+15 puan)")
-    puan += 15
-else:
-    st.error("❌ Deneyim algılanmadı! (-5 puan)")
-    puan -= 5
     
-    toplam_puan = min(puan, 100)
-    return toplam_puan, bulunanlar, eksikler
+    if yil_bulundu:
+        st.success(f"✅ {len(rakamlar)} yıl deneyim algılandı! (+15 puan)")
+        puan += 15
+    else:
+        st.error("❌ Deneyim algılanmadı! (-5 puan)")
+        puan -= 5
 # Uygulama Akışı
 if uploaded_file is not None:
     st.success("✅ CV Başarıyla Yüklendi!")
