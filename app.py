@@ -40,12 +40,12 @@ def cv_analiz_et(cv_metni, kriterler, min_deneyim):
     
     # AI Benzerlik Tablosu (Akıllı Eşleştirme)
     benzerlik_tablosu = {
-        "backend": ["python", "java", "node.js", "django", "spring"],
-        "frontend": ["react", "javascript", "vue", "angular", "html"],
-        "veritabanı": ["sql", "mysql", "postgresql", "mongodb", "oracle"],
-        "bulut": ["aws", "azure", "gcp", "docker", "kubernetes"],
-        "liderlik": ["lider", "yönetim", "takım", "proje yöneticisi"]
-    }
+    "backend": ["backend", "arka uç", "arka plan"],
+    "frontend": ["frontend", "ön uç", "ön yüz"],
+    "veritabanı": ["veritabanı", "database", "db"],
+    "bulut": ["aws", "docker", "kubernetes", "k8s"],
+    "liderlik": ["lider", "yönetim", "manager"]
+}
     
     cv_metni_kucuk = cv_metni.lower()
     
