@@ -6,7 +6,7 @@ import re
 # Sayfa Ayarları
 st.set_page_config(page_title="Akıllı CV Analiz", layout="wide")
 
-st.title("🚀 Akıllı CV Analiz ve Puanlama Sistemi (AI Destekli)")
+st.title("Akıllı CV Analiz ve Puanlama Sistemi (AI Destekli)")
 st.markdown("CV'nizi yükleyin, yapay zeka puanlasın!")
 
 # Şirket Kriterleri
