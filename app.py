@@ -5,14 +5,14 @@ import PyPDF2
 # Sayfa Ayarları
 st.set_page_config(page_title="Akıllı CV Analiz", layout="wide")
 
-st.title(" Akıllı CV Analiz ve Puanlama Sistemi")
-st.markdown("CV'nizi yükleyin, sistem puanlasın!")
+st.title("🚀 Akıllı CV Analiz ve Puanlama Sistemi (AI Destekli)")
+st.markdown("CV'nizi yükleyin, yapay zeka puanlasın!")
 
 # Şirket Kriterleri
 st.sidebar.header("📋 Şirket Kriterleri")
 aranan_kriterler = st.sidebar.multiselect(
     "Aranan Yetenekler",
-    ["Python", "Java", "SQL", "C#", "JavaScript", "AWS", "Docker", "Liderlik", "İngilizce", "github", "itü"],
+    ["Python", "Java", "SQL", "C#", "JavaScript", "AWS", "Docker", "Liderlik", "İngilizce", "React", "Node.js", "Git"],
     default=["Python", "SQL"]
 )
 
@@ -38,8 +38,7 @@ def cv_analiz_et(cv_metni, kriterler, min_deneyim):
     bulunanlar = []
     eksikler = []
     
-    
-# AI Benzerlik Tablosu (Akıllı Eşleştirme)
+    # AI Benzerlik Tablosu (Akıllı Eşleştirme)
     benzerlik_tablosu = {
         "backend": ["python", "java", "node.js", "django", "spring"],
         "frontend": ["react", "javascript", "vue", "angular", "html"],
@@ -50,21 +49,21 @@ def cv_analiz_et(cv_metni, kriterler, min_deneyim):
     
     cv_metni_kucuk = cv_metni.lower()
     
-    
-# Anahtar Kelime Eşleşmesi
+    # Anahtar Kelime Eşleşmesi
     for kriter in kriterler:
         if kriter.lower() in cv_metni_kucuk:
             puan += 10
             bulunanlar.append(kriter)
         else:
-            
-# AI Benzerlik Kontrolü
-             for anahtar, esdegerler in benzerlik_tablosu.items():
+            # AI Benzerlik Kontrolü
+            esitlendi = False
+            for anahtar, esdegerler in benzerlik_tablosu.items():
                 if anahtar in cv_metni_kucuk and any(esdeger in cv_metni_kucuk for esdeger in esdegerler):
                     puan += 8  # Kısmi puan
                     bulunanlar.append(f"{kriter} (AI)")
+                    esitlendi = True
                     break
-            else:
+            if not esitlendi:
                 eksikler.append(kriter)
     
     # Deneyim Kontrolü
@@ -75,10 +74,11 @@ def cv_analiz_et(cv_metni, kriterler, min_deneyim):
     
     toplam_puan = min(puan, 100)
     return toplam_puan, bulunanlar, eksikler
+
 # Uygulama Akışı
 if uploaded_file is not None:
     st.success("✅ CV Başarıyla Yüklendi!")
-    cv_metni = cv_metnini_ok1u(uploaded_file)
+    cv_metni = cv_metnini_oku(uploaded_file)
     
     with st.expander("CV İçeriğini Görüntüle"):
         st.text(cv_metni[:500] + "...")
@@ -113,4 +113,4 @@ else:
     st.info("👈 Sol menüden kriterleri seçin ve CV yükleyin!")
 
 st.markdown("---")
-st.markdown("© 2024 Akıllı CV Analiz Sistemi - Yapay Zeka Destekli")
+st.markdown("© 2024 Akıllı CV Analiz Sistemi - AI Destekli")
