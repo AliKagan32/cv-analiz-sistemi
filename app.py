@@ -49,12 +49,11 @@ def cv_analiz_et(cv_metni, kriterler, min_deneyim):
 
     cv_metni_kucuk = cv_metni.lower()
 
-    # ✅ YENİ 2: Ağırlıklı Puanlama
     agirliklar = {
-        "beceri": 0.50,   # %50
-        "deneyim": 0.20,  # %20
-        "egitim": 0.20,   # %20
-        "diger": 0.10     # %10
+        "beceri": 0.50,
+        "deneyim": 0.20,
+        "egitim": 0.20,
+        "diger": 0.10
     }
 
     # Beceri Eşleşmesi (%50 ağırlıklı)
@@ -64,13 +63,14 @@ def cv_analiz_et(cv_metni, kriterler, min_deneyim):
             beceri_puan += 10
             bulunanlar.append(kriter)
         else:
+            kriter_kucuk = kriter.lower()
             esitlendi = False
-            for anahtar, esdegerler in benzerlik_tablosu.items():
+            if kriter_kucuk in benzerlik_tablosu:
+                esdegerler = benzerlik_tablosu[kriter_kucuk]
                 if any(esdeger in cv_metni_kucuk for esdeger in esdegerler):
                     beceri_puan += 8
                     bulunanlar.append(f"{kriter} (AI)")
                     esitlendi = True
-                    break
             if not esitlendi:
                 eksikler.append(kriter)
 
@@ -93,9 +93,8 @@ def cv_analiz_et(cv_metni, kriterler, min_deneyim):
 
     puan += min(deneyim_puan, 100) * agirliklar["deneyim"]
 
-    # ✅ YENİ 3: Eğitim Analizi (%20 ağırlıklı)
+    # Eğitim Analizi (%20 ağırlıklı)
     egitim_puan = 0
-
     dereceler = {
         "doktora": 100,
         "phd": 100,
@@ -112,7 +111,7 @@ def cv_analiz_et(cv_metni, kriterler, min_deneyim):
 
     for derece, skor in dereceler.items():
         if derece in cv_metni_kucuk:
-            egitim_puan = max(egitim_puan, skor)  # en yüksek bulunan derece
+            egitim_puan = max(egitim_puan, skor)
 
     puan += egitim_puan * agirliklar["egitim"]
 
@@ -121,25 +120,6 @@ def cv_analiz_et(cv_metni, kriterler, min_deneyim):
 
     toplam_puan = min(round(puan), 100)
     return toplam_puan, bulunanlar, eksikler
-
-    # Beceri Eşleşmesi (%50 ağırlıklı)
-    beceri_puan = 0
-    for kriter in kriterler:
-        if kriter.lower() in cv_metni_kucuk:
-            beceri_puan += 10
-            bulunanlar.append(kriter)
-        else:
-            # Sadece o kritere ait eşdeğerleri ara
-            kriter_kucuk = kriter.lower()
-            esitlendi = False
-            if kriter_kucuk in benzerlik_tablosu:
-                esdegerler = benzerlik_tablosu[kriter_kucuk]
-                if any(esdeger in cv_metni_kucuk for esdeger in esdegerler):
-                    beceri_puan += 8
-                    bulunanlar.append(f"{kriter} (AI)")
-                    esitlendi = True
-            if not esitlendi:
-                eksikler.append(kriter)
 
 # Uygulama Akışı
 if uploaded_file is not None:
