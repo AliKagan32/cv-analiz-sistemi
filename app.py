@@ -88,7 +88,7 @@ if uploaded_file is not None:
     st.text_area("📄 PDF İçeriği", cv_metni, height=200)
     puan, bulunanlar, eksikler, yil_bulundu, rakamlar = cv_analiz_et(cv_metni, aranan_kriterler, min_deneyim)
 
-st.markdown("### 📊 Analiz Sonuçları")
+    st.markdown("### 📊 Analiz Sonuçları")
     col1, col2, col3 = st.columns(3)
 
     with col1:
