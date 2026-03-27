@@ -57,6 +57,10 @@ def cv_analiz_et(cv_metni, kriterler, min_deneyim):
     }
 
     # Beceri Eşleşmesi (%50 ağırlıklı)
+beceri_puan = 0
+    for kriter in kriterler:
+        st.write(f"Aranan: {kriter} | CV'de var mı: {kriter.lower() in cv_metni_kucuk}")
+
     beceri_puan = 0
     for kriter in kriterler:
         if kriter.lower() in cv_metni_kucuk:
