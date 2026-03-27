@@ -38,13 +38,6 @@ def cv_analiz_et(cv_metni, kriterler, min_deneyim):
     puan = 0
     bulunanlar = []
     eksikler = []
-
-    # DEBUG: Yıl algılama testi
-    st.write("--- DEBUG ---")
-    st.write(f"CV metni: {cv_metni_kucuk[:100]}...")
-    st.write(f"Yıl varyasyonları bulundu: {yil_bulundu}")
-    st.write(f"Rakamlar: {rakamlar}")
-    st.write("--- DEBUG SON ---")
     
     # AI Benzerlik Tablosu
     benzerlik_tablosu = {
@@ -101,9 +94,24 @@ if uploaded_file is not None:
     
     with st.expander("CV İçeriğini Görüntüle"):
         st.text(cv_metni[:500] + "...")
+        cv_metni = cv_metnini_oku(upload_file)
+    # DEBUG: Yıl algılama testi
+    st.markdown("### 🔍 DEBUG BİLGİLERİ")
+    st.write("**CV Metni (İlk 200 karakter):**")
+    st.text(cv_metni[:200] + "...")
     
+    cv_metni_kucuk = cv_metni.lower()
+    yil_varyasyonlari = ["yıl", "yil", "year", "yıllık", "deneyim"]
+    yil_bulundu = any(varyasyon in cv_metni_kucuk for varyasyon in yil_varyasyonlari)
+    
+    rakamlar = re.findall(r'\d+', cv_metni)
+    
+    st.write(f"**Yıl kelimesi bulundu:** {yil_bulundu}")
+    st.write(f"**Rakamlar bulundu:** {rakamlar}")
+    st.write("---")
+
     puan, bulunanlar, eksikler = cv_analiz_et(cv_metni, aranan_kriterler, min_deneyim)
-    
+
     st.markdown("### 📊 Analiz Sonuçları")
     col1, col2, col3 = st.columns(3)
     
