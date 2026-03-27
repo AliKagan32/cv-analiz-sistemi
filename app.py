@@ -38,6 +38,13 @@ def cv_analiz_et(cv_metni, kriterler, min_deneyim):
     puan = 0
     bulunanlar = []
     eksikler = []
+
+    # DEBUG: Yıl algılama testi
+    st.write("--- DEBUG ---")
+    st.write(f"CV metni: {cv_metni_kucuk[:100]}...")
+    st.write(f"Yıl varyasyonları bulundu: {yil_bulundu}")
+    st.write(f"Rakamlar: {rakamlar}")
+    st.write("--- DEBUG SON ---")
     
     # AI Benzerlik Tablosu
     benzerlik_tablosu = {
