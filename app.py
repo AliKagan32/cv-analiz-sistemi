@@ -84,16 +84,11 @@ if uploaded_file is not None:
     st.success("✅ CV Başarıyla Yüklendi!")
     cv_metni = cv_metnini_oku(uploaded_file)
 
-    # ✅ Düzeltme 2: @@ satırı silindi, doğru unpacking
+    # ✅ PDF içeriği buraya ekleniyor
+    st.text_area("📄 PDF İçeriği", cv_metni, height=200)
     puan, bulunanlar, eksikler, yil_bulundu, rakamlar = cv_analiz_et(cv_metni, aranan_kriterler, min_deneyim)
 
-    # Yıl durumu göster
-    if yil_bulundu or len(rakamlar) > 0:
-        st.success(f"✅ {len(rakamlar)} rakam/yıl bilgisi algılandı! (+15 puan)")
-    else:
-        st.warning("⚠️ Deneyim bilgisi eksik (-5 puan)")
-
-    st.markdown("### 📊 Analiz Sonuçları")
+        st.markdown("### 📊 Analiz Sonuçları")
     col1, col2, col3 = st.columns(3)
 
     with col1:
