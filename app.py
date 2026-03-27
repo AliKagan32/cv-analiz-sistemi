@@ -32,31 +32,53 @@ def cv_metnini_oku(pdf_file):
     except:
         return "CV okunamadı!"
 
-# Analiz Fonksiyonu (Basit)
+# AI Destekli Analiz Fonksiyonu
 def cv_analiz_et(cv_metni, kriterler, min_deneyim):
     puan = 0
     bulunanlar = []
     eksikler = []
     
+    
+# AI Benzerlik Tablosu (Akıllı Eşleştirme)
+    benzerlik_tablosu = {
+        "backend": ["python", "java", "node.js", "django", "spring"],
+        "frontend": ["react", "javascript", "vue", "angular", "html"],
+        "veritabanı": ["sql", "mysql", "postgresql", "mongodb", "oracle"],
+        "bulut": ["aws", "azure", "gcp", "docker", "kubernetes"],
+        "liderlik": ["lider", "yönetim", "takım", "proje yöneticisi"]
+    }
+    
+    cv_metni_kucuk = cv_metni.lower()
+    
+    
+# Anahtar Kelime Eşleşmesi
     for kriter in kriterler:
-        if kriter.lower() in cv_metni.lower():
+        if kriter.lower() in cv_metni_kucuk:
             puan += 10
             bulunanlar.append(kriter)
         else:
-            eksikler.append(kriter)
+            
+# AI Benzerlik Kontrolü
+             for anahtar, esdegerler in benzerlik_tablosu.items():
+                if anahtar in cv_metni_kucuk and any(esdeger in cv_metni_kucuk for esdeger in esdegerler):
+                    puan += 8  # Kısmi puan
+                    bulunanlar.append(f"{kriter} (AI)")
+                    break
+            else:
+                eksikler.append(kriter)
     
-    if "yıl" in cv_metni.lower():
+    # Deneyim Kontrolü
+    if "yıl" in cv_metni_kucuk:
         puan += 15
     else:
         puan -= 5
     
     toplam_puan = min(puan, 100)
     return toplam_puan, bulunanlar, eksikler
-
 # Uygulama Akışı
 if uploaded_file is not None:
     st.success("✅ CV Başarıyla Yüklendi!")
-    cv_metni = cv_metnini_oku(uploaded_file)
+    cv_metni = cv_metnini_ok1u(uploaded_file)
     
     with st.expander("CV İçeriğini Görüntüle"):
         st.text(cv_metni[:500] + "...")
