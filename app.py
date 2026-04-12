@@ -19,6 +19,39 @@ aranan_kriterler = st.sidebar.multiselect(
 
 min_deneyim = st.sidebar.slider("Minimum Deneyim (Yıl)", 0, 20, 3)
 
+st.sidebar.markdown("---")
+st.sidebar.header("🎓 Eğitim Kriterleri")
+
+with st.sidebar.expander("🏫 Ortaöğretim"):
+    ortaogretim_okullar = st.multiselect("", [
+        "Galatasaray Lisesi", "Robert Kolej", "Kabataş Erkek Lisesi",
+        "Ankara Fen Lisesi", "İTÜ Geliştirme Vakfı Okulları"
+    ], key="ortaogretim")
+
+with st.sidebar.expander("🎓 Önlisans"):
+    onlisans_okullar = st.multiselect("", [
+        "Boğaziçi MYO", "İTÜ MYO", "Bilgi MYO",
+        "Hacettepe MYO", "ODTÜ MYO"
+    ], key="onlisans")
+
+with st.sidebar.expander("🎓 Lisans"):
+    lisans_okullar = st.multiselect("", [
+        "Boğaziçi Üniversitesi", "ODTÜ", "İTÜ",
+        "Hacettepe", "Bilkent", "Koç Üniversitesi", "Sabancı Üniversitesi"
+    ], key="lisans")
+
+with st.sidebar.expander("🎓 Yüksek Lisans"):
+    yukseklisans_okullar = st.multiselect("", [
+        "Boğaziçi Üniversitesi", "ODTÜ", "İTÜ",
+        "Koç Üniversitesi", "Sabancı Üniversitesi", "Bilkent"
+    ], key="yukseklisans")
+
+with st.sidebar.expander("🎓 Doktora"):
+    doktora_okullar = st.multiselect("", [
+        "Boğaziçi Üniversitesi", "ODTÜ", "İTÜ",
+        "Koç Üniversitesi", "Sabancı Üniversitesi", "Hacettepe"
+    ], key="doktora")
+
 # CV Yükleme
 uploaded_file = st.file_uploader("CV'nizi Yükleyin (PDF)", type=["pdf"])
 
@@ -34,7 +67,7 @@ def cv_metnini_oku(pdf_file):
         return "CV okunamadı!"
 
 # AI Destekli Analiz Fonksiyonu
-def cv_analiz_et(cv_metni, kriterler, min_deneyim):
+def cv_analiz_et(cv_metni, kriterler, min_deneyim, egitim_kriterler):
     puan = 0
     bulunanlar = []
     eksikler = []
@@ -95,23 +128,19 @@ def cv_analiz_et(cv_metni, kriterler, min_deneyim):
 
     # Eğitim Analizi (%20 ağırlıklı)
     egitim_puan = 0
-    dereceler = {
-        "doktora": 100,
-        "phd": 100,
-        "yüksek lisans": 80,
-        "master": 80,
-        "msc": 80,
+
+    derece_puanlar = {
+        "ortaogretim": 20,
+        "onlisans": 40,
         "lisans": 60,
-        "bachelor": 60,
-        "üniversite": 50,
-        "university": 50,
-        "önlisans": 30,
-        "associate": 30,
+        "yukseklisans": 80,
+        "doktora": 100
     }
 
-    for derece, skor in dereceler.items():
-        if derece in cv_metni_kucuk:
-            egitim_puan = max(egitim_puan, skor)
+    for derece, okullar in egitim_kriterler.items():
+        for okul in okullar:
+            if okul.lower() in cv_metni_kucuk:
+                egitim_puan = max(egitim_puan, derece_puanlar[derece])
 
     puan += egitim_puan * agirliklar["egitim"]
 
@@ -129,7 +158,15 @@ if uploaded_file is not None:
     st.success("✅ CV Başarıyla Yüklendi!")
     cv_metni = cv_metnini_oku(uploaded_file)
 
-    puan, bulunanlar, eksikler = cv_analiz_et(cv_metni, aranan_kriterler, min_deneyim)
+    egitim_kriterler = {
+        "ortaogretim": ortaogretim_okullar,
+        "onlisans": onlisans_okullar,
+        "lisans": lisans_okullar,
+        "yukseklisans": yukseklisans_okullar,
+        "doktora": doktora_okullar
+    }
+
+    puan, bulunanlar, eksikler = cv_analiz_et(cv_metni, aranan_kriterler, min_deneyim, egitim_kriterler)
 
     st.markdown("### 📊 Analiz Sonuçları")
     col1, col2, col3 = st.columns(3)
