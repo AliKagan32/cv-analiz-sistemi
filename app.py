@@ -20,6 +20,10 @@ aranan_kriterler = st.sidebar.multiselect(
 min_deneyim = st.sidebar.slider("Minimum Deneyim (Yıl)", 0, 20, 3)
 
 st.sidebar.markdown("---")
+basari_gerekli = st.sidebar.toggle("🏆 Başarı Belgesi Gerekli mi?", value=False)
+
+# Eğitim Kriterleri
+st.sidebar.markdown("---")
 st.sidebar.header("🎓 Eğitim Kriterleri")
 
 with st.sidebar.expander("🏫 Ortaöğretim"):
@@ -52,6 +56,14 @@ with st.sidebar.expander("🎓 Doktora"):
         "Koç Üniversitesi", "Sabancı Üniversitesi", "Hacettepe"
     ], key="doktora")
 
+st.sidebar.markdown("---")
+arastirma_gerekli = st.sidebar.toggle("🔬 Yapay Zeka Araştırması Gerekli mi?", value=False)
+
+# Diğer Kriterler
+st.sidebar.markdown("---")
+st.sidebar.header("📁 Diğer Kriterler")
+proje_gerekli = st.sidebar.toggle("💡 Proje Gerekli mi?", value=False)
+
 # CV Yükleme
 uploaded_file = st.file_uploader("CV'nizi Yükleyin (PDF)", type=["pdf"])
 
@@ -67,7 +79,8 @@ def cv_metnini_oku(pdf_file):
         return "CV okunamadı!"
 
 # AI Destekli Analiz Fonksiyonu
-def cv_analiz_et(cv_metni, kriterler, min_deneyim, egitim_kriterler):
+def cv_analiz_et(cv_metni, kriterler, min_deneyim, egitim_kriterler,
+                 basari_gerekli, arastirma_gerekli, proje_gerekli):
     puan = 0
     bulunanlar = []
     eksikler = []
@@ -84,12 +97,15 @@ def cv_analiz_et(cv_metni, kriterler, min_deneyim, egitim_kriterler):
 
     agirliklar = {
         "beceri": 0.50,
-        "deneyim": 0.20,
-        "egitim": 0.20,
-        "diger": 0.10
+        "deneyim": 0.15,
+        "basari": 0.05,
+        "egitim": 0.15,
+        "arastirma": 0.05,
+        "diger": 0.05,
+        "proje": 0.05,
     }
 
-    # Beceri Eşleşmesi (%50 ağırlıklı)
+    # Beceri Eşleşmesi (%50)
     beceri_puan = 0
     for kriter in kriterler:
         if re.search(r'\b' + re.escape(kriter.lower()) + r'\b', cv_metni_kucuk):
@@ -110,7 +126,7 @@ def cv_analiz_et(cv_metni, kriterler, min_deneyim, egitim_kriterler):
     max_beceri = len(kriterler) * 10 if kriterler else 1
     puan += (beceri_puan / max_beceri) * 100 * agirliklar["beceri"]
 
-    # Deneyim Puanı (%20 ağırlıklı)
+    # Deneyim (%15)
     yil_varyasyonlari = ["yıl", "yil", "year", "yıllık", "deneyim"]
     yil_bulundu = any(v in cv_metni_kucuk for v in yil_varyasyonlari)
     rakamlar = re.findall(r'\d+', cv_metni)
@@ -126,9 +142,19 @@ def cv_analiz_et(cv_metni, kriterler, min_deneyim, egitim_kriterler):
 
     puan += min(deneyim_puan, 100) * agirliklar["deneyim"]
 
-    # Eğitim Analizi (%20 ağırlıklı)
-    egitim_puan = 0
+    # Başarı Belgesi (%5)
+    if basari_gerekli:
+        basari_kelimeleri = ["ödül", "odul", "award", "başarı", "basari", "sertifika",
+                             "certificate", "teşvik", "tesvik", "birinci", "finalist"]
+        basari_var = any(k in cv_metni_kucuk for k in basari_kelimeleri)
+        basari_puan = 100 if basari_var else 0
+    else:
+        basari_puan = 100
 
+    puan += basari_puan * agirliklar["basari"]
+
+    # Eğitim (%15)
+    egitim_puan = 0
     derece_puanlar = {
         "ortaogretim": 20,
         "onlisans": 40,
@@ -144,11 +170,35 @@ def cv_analiz_et(cv_metni, kriterler, min_deneyim, egitim_kriterler):
 
     puan += egitim_puan * agirliklar["egitim"]
 
-    # Diğer (%10 sabit bonus)
+    # Araştırma (%5)
+    if arastirma_gerekli:
+        arastirma_kelimeleri = ["yapay zeka", "yapay zekâ", "artificial intelligence",
+                                "machine learning", "makine öğrenmesi", "deep learning",
+                                "derin öğrenme", "araştırma", "arastirma", "research",
+                                "tübitak", "tubitak"]
+        arastirma_var = any(k in cv_metni_kucuk for k in arastirma_kelimeleri)
+        arastirma_puan = 100 if arastirma_var else 0
+    else:
+        arastirma_puan = 100
+
+    puan += arastirma_puan * agirliklar["arastirma"]
+
+    # Diğer (%5 sabit)
     puan += 100 * agirliklar["diger"]
 
+    # Proje (%5)
+    if proje_gerekli:
+        proje_kelimeleri = ["proje", "project", "geliştirme", "gelistirme",
+                            "development", "uygulama", "application", "sistem", "system"]
+        proje_var = any(k in cv_metni_kucuk for k in proje_kelimeleri)
+        proje_puan = 100 if proje_var else 0
+    else:
+        proje_puan = 100
+
+    puan += proje_puan * agirliklar["proje"]
+
     toplam_puan = min(round(puan), 100)
-    return toplam_puan, bulunanlar, eksikler
+    return toplam_puan, bulunanlar, eksikler, basari_puan, arastirma_puan, proje_puan
 
 # Uygulama Akışı
 if uploaded_file is not None:
@@ -166,7 +216,10 @@ if uploaded_file is not None:
         "doktora": doktora_okullar
     }
 
-    puan, bulunanlar, eksikler = cv_analiz_et(cv_metni, aranan_kriterler, min_deneyim, egitim_kriterler)
+    puan, bulunanlar, eksikler, basari_puan, arastirma_puan, proje_puan = cv_analiz_et(
+        cv_metni, aranan_kriterler, min_deneyim, egitim_kriterler,
+        basari_gerekli, arastirma_gerekli, proje_gerekli
+    )
 
     st.markdown("### 📊 Analiz Sonuçları")
     col1, col2, col3 = st.columns(3)
@@ -185,6 +238,20 @@ if uploaded_file is not None:
     st.markdown("#### ❌ Eksik Yetenekler")
     for yetenek in eksikler:
         st.write(f"❌ {yetenek}")
+
+    # Ek Kategori Sonuçları
+    if basari_gerekli or arastirma_gerekli or proje_gerekli:
+        st.markdown("#### 📋 Ek Kategori Sonuçları")
+        col4, col5, col6 = st.columns(3)
+        with col4:
+            if basari_gerekli:
+                st.metric("🏆 Başarı Belgesi", "✅ Var" if basari_puan == 100 else "❌ Yok")
+        with col5:
+            if arastirma_gerekli:
+                st.metric("🔬 YZ Araştırması", "✅ Var" if arastirma_puan == 100 else "❌ Yok")
+        with col6:
+            if proje_gerekli:
+                st.metric("💡 Proje", "✅ Var" if proje_puan == 100 else "❌ Yok")
 
     if puan >= 70:
         st.success("🎉 Bu aday mülakata çağrılabilir!")
