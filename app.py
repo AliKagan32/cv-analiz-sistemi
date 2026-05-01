@@ -1,6 +1,7 @@
 import streamlit as st
 import PyPDF2
 import re
+from datetime import datetime
 
 # Sayfa Ayarları
 st.set_page_config(page_title="Akıllı CV Analiz", layout="wide")
@@ -39,33 +40,18 @@ st.markdown("---")
 # ─────────────────────────────────────────
 # ÜST KATEGORİ BUTONLARI
 # ─────────────────────────────────────────
-col_b1, col_b2, col_b3, col_b4 = st.columns([1, 1, 1, 3])
+col_b1, col_b2, col_b3 = st.columns([1, 1, 4])
 
 with col_b1:
     if st.button("💼 İş Kriterleri", use_container_width=True,
                  type="primary" if st.session_state.aktif_kategori == "is" else "secondary"):
-        if st.session_state.aktif_kategori == "is":
-            st.session_state.aktif_kategori = None
-        else:
-            st.session_state.aktif_kategori = "is"
+        st.session_state.aktif_kategori = None if st.session_state.aktif_kategori == "is" else "is"
         st.rerun()
 
 with col_b2:
     if st.button("🎓 Eğitim Kriterleri", use_container_width=True,
                  type="primary" if st.session_state.aktif_kategori == "egitim" else "secondary"):
-        if st.session_state.aktif_kategori == "egitim":
-            st.session_state.aktif_kategori = None
-        else:
-            st.session_state.aktif_kategori = "egitim"
-        st.rerun()
-
-with col_b3:
-    if st.button("📁 Diğer Kriterler", use_container_width=True,
-                 type="primary" if st.session_state.aktif_kategori == "diger" else "secondary"):
-        if st.session_state.aktif_kategori == "diger":
-            st.session_state.aktif_kategori = None
-        else:
-            st.session_state.aktif_kategori = "diger"
+        st.session_state.aktif_kategori = None if st.session_state.aktif_kategori == "egitim" else "egitim"
         st.rerun()
 
 # ─────────────────────────────────────────
@@ -84,13 +70,10 @@ if st.session_state.aktif_kategori == "is":
             )
         with col2:
             st.session_state.min_deneyim = st.slider(
-                "Minimum Deneyim (Yıl)", 0, 20,
-                st.session_state.min_deneyim
-            )
+                "Minimum Deneyim (Yıl)", 0, 20, st.session_state.min_deneyim)
             st.session_state.proje_gerekli = st.toggle(
                 "📁 Herhangi bir çalışmada projesi gerekli mi?",
-                value=st.session_state.proje_gerekli
-            )
+                value=st.session_state.proje_gerekli)
 
 elif st.session_state.aktif_kategori == "egitim":
     with st.container(border=True):
@@ -102,16 +85,13 @@ elif st.session_state.aktif_kategori == "egitim":
                 ["Fark Etmez", "Ortaöğretim", "Önlisans", "Lisans", "Yüksek Lisans", "Doktora"],
                 index=["Fark Etmez", "Ortaöğretim", "Önlisans", "Lisans",
                        "Yüksek Lisans", "Doktora"].index(st.session_state.min_egitim),
-                horizontal=True
-            )
+                horizontal=True)
             st.session_state.arastirma_gerekli = st.toggle(
                 "🔬 Herhangi bir YZ araştırması ve projesi gerekli mi?",
-                value=st.session_state.arastirma_gerekli
-            )
+                value=st.session_state.arastirma_gerekli)
             st.session_state.basari_gerekli = st.toggle(
                 "🏆 Başarı belgesi veya diploması gerekli mi?",
-                value=st.session_state.basari_gerekli
-            )
+                value=st.session_state.basari_gerekli)
         with col2:
             st.markdown("**🏫 Belirli Okul Seç (opsiyonel)**")
             tab1, tab2, tab3, tab4, tab5 = st.tabs(
@@ -142,11 +122,6 @@ elif st.session_state.aktif_kategori == "egitim":
                     "Koç Üniversitesi", "Sabancı Üniversitesi", "Hacettepe"
                 ], default=st.session_state.doktora_okullar, key="dok")
 
-elif st.session_state.aktif_kategori == "diger":
-    with st.container(border=True):
-        st.markdown("### 📁 Diğer Kriterler")
-        st.info("Şu an diğer kriterler iş ve eğitim kategorileri içinde yönetilmektedir.")
-
 st.markdown("---")
 
 # ─────────────────────────────────────────
@@ -163,6 +138,43 @@ def cv_metnini_oku(pdf_file):
         return text
     except:
         return "CV okunamadı!"
+
+def kisisel_bilgi_cikart(cv_metni):
+    """CV'den isim, TC, telefon gibi temel bilgileri çıkartır."""
+    bilgiler = {}
+
+    satirlar = cv_metni.split('\n')
+
+    # İsim — genellikle ilk birkaç satırda geçer
+    for satir in satirlar[:10]:
+        satir = satir.strip()
+        if satir and len(satir.split()) >= 2 and len(satir) < 50:
+            # Sadece harf ve boşluk içeren satır isim adayı
+            if re.match(r'^[A-Za-zÇçĞğİıÖöŞşÜü\s]+$', satir):
+                bilgiler["Ad Soyad"] = satir
+                break
+
+    # Telefon
+    tel = re.search(r'(\+?90[\s\-]?)?(\(?\d{3}\)?[\s\-]?\d{3}[\s\-]?\d{2}[\s\-]?\d{2})', cv_metni)
+    if tel:
+        bilgiler["Telefon"] = tel.group(0).strip()
+
+    # TC Kimlik No (11 haneli sayı)
+    tc = re.search(r'\b[1-9][0-9]{10}\b', cv_metni)
+    if tc:
+        bilgiler["TC Kimlik No"] = tc.group(0)
+
+    # E-posta
+    email = re.search(r'[\w\.-]+@[\w\.-]+\.\w+', cv_metni)
+    if email:
+        bilgiler["E-posta"] = email.group(0)
+
+    # Doğum tarihi
+    dogum = re.search(r'\b(\d{2}[.\/\-]\d{2}[.\/\-]\d{4})\b', cv_metni)
+    if dogum:
+        bilgiler["Doğum Tarihi"] = dogum.group(0)
+
+    return bilgiler
 
 def cv_analiz_et(cv_metni, kriterler, min_deneyim, min_egitim, egitim_kriterler,
                  basari_gerekli, arastirma_gerekli, proje_gerekli):
@@ -181,13 +193,8 @@ def cv_analiz_et(cv_metni, kriterler, min_deneyim, min_egitim, egitim_kriterler,
     cv_metni_kucuk = cv_metni.lower()
 
     agirliklar = {
-        "beceri": 0.50,
-        "deneyim": 0.15,
-        "basari": 0.05,
-        "egitim": 0.15,
-        "arastirma": 0.05,
-        "diger": 0.05,
-        "proje": 0.05,
+        "beceri": 0.50, "deneyim": 0.15, "basari": 0.05,
+        "egitim": 0.15, "arastirma": 0.05, "diger": 0.05, "proje": 0.05,
     }
 
     # Beceri (%50)
@@ -357,6 +364,64 @@ if uploaded_file is not None:
         st.warning("⚠️ Aday değerlendirilebilir, ek mülakat önerilir.")
     else:
         st.error("❌ Aday kriterlere uygun değil.")
+
+    # ─────────────────────────────────────────
+    # NOT ALMA BÖLÜMÜ
+    # ─────────────────────────────────────────
+    st.markdown("---")
+    st.markdown("### 📝 Aday Notu")
+
+    # Kişisel bilgileri çıkart
+    kisisel = kisisel_bilgi_cikart(cv_metni)
+
+    # Kişisel bilgileri düzenli göster
+    with st.container(border=True):
+        st.markdown("**📋 CV'den Algılanan Bilgiler**")
+        if kisisel:
+            cols = st.columns(len(kisisel))
+            for i, (anahtar, deger) in enumerate(kisisel.items()):
+                cols[i].markdown(f"**{anahtar}**  \n{deger}")
+        else:
+            st.info("CV'den kişisel bilgi algılanamadı.")
+
+    # Not alanı
+    not_metni = st.text_area(
+        "Adaya dair notlarınızı buraya yazın:",
+        placeholder="Örn: Mülakat için uygun, deneyimi yeterli ancak Python bilgisi zayıf...",
+        height=150
+    )
+
+    # TXT içeriği oluştur
+    tarih = datetime.now().strftime("%d.%m.%Y %H:%M")
+    aday_adi = kisisel.get("Ad Soyad", "Bilinmiyor")
+
+    txt_icerik = "============================================================\n"
+    txt_icerik += "ADAY DEĞERLENDİRME NOTU\n"
+    txt_icerik += f"Tarih: {tarih}\n"
+    txt_icerik += "============================================================\n\n"
+    txt_icerik += "--- KİŞİSEL BİLGİLER ---\n"
+    for anahtar, deger in kisisel.items():
+        txt_icerik += f"{anahtar}: {deger}\n"
+    txt_icerik += "\n--- ANALİZ SONUÇLARI ---\n"
+    txt_icerik += f"Uyumluluk Puani : {puan}/100\n"
+    txt_icerik += f"Bulunan Yetenekler: {', '.join(bulunanlar) if bulunanlar else 'Yok'}\n"
+    txt_icerik += f"Eksik Yetenekler  : {', '.join(eksikler) if eksikler else 'Yok'}\n"
+    txt_icerik += "\n--- DEGERLENDİRME ---\n"
+    txt_icerik += ("Mulakata cagrilabilir\n" if puan >= 70 else
+                   "Degerlendirilebilir\n" if puan >= 40 else "Kriterlere uygun degil\n")
+    txt_icerik += "\n--- NOT ---\n"
+    txt_icerik += (not_metni if not_metni.strip() else "(Not girilmedi)")
+    txt_icerik += "\n\n============================================================\n"
+
+    dosya_adi = f"aday_notu_{aday_adi.replace(' ', '_')}_{datetime.now().strftime('%Y%m%d_%H%M')}.txt"
+
+    st.download_button(
+        label="💾 Notu TXT Olarak İndir",
+        data=txt_icerik.encode("utf-8"),
+        file_name=dosya_adi,
+        mime="text/plain"
+    )
+
 else:
     st.info("👆 Önce kriterleri belirleyin, ardından CV yükleyin!")
 
