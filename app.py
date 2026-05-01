@@ -143,13 +143,13 @@ def kisisel_bilgi_cikart(cv_metni):
     bilgiler = {}
     satirlar = cv_metni.split('\n')
 
-       for satir in satirlar[:15]:
-            satir = satir.strip()
-            if "ad soyad" in satir.lower() and ":" in satir:
-                isim = satir.split(":")[-1].strip()
-                if isim:
-                    bilgiler["Ad Soyad"] = isim
-                    break
+    for satir in satirlar[:20]:
+        satir = satir.strip()
+        if "ad soyad" in satir.lower() and ":" in satir:
+            isim = satir.split(":")[-1].strip()
+            if isim:
+                bilgiler["Ad Soyad"] = isim
+                break
 
     tel = re.search(r'(\+?90[\s\-]?)?(\(?\d{3}\)?[\s\-]?\d{3}[\s\-]?\d{2}[\s\-]?\d{2})', cv_metni)
     if tel:
@@ -167,7 +167,7 @@ def kisisel_bilgi_cikart(cv_metni):
     if dogum:
         bilgiler["Doğum Tarihi"] = dogum.group(0)
 
-    return bilgiler   
+    return bilgiler
 
 def cv_analiz_et(cv_metni, kriterler, min_deneyim, min_egitim, egitim_kriterler,
                  basari_gerekli, arastirma_gerekli, proje_gerekli):
@@ -301,7 +301,7 @@ if uploaded_file is not None:
         st.text(cv_metni)
     st.success("✅ CV Başarıyla Yüklendi!")
     cv_metni = cv_metnini_oku(uploaded_file)
-    st.write("İlk 10 satır:", cv_metni.split('\n')[:10])
+
     egitim_kriterler = {
         "ortaogretim": st.session_state.ortaogretim_okullar,
         "onlisans": st.session_state.onlisans_okullar,
