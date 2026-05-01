@@ -373,6 +373,7 @@ if uploaded_file is not None:
 
     # Kişisel bilgileri çıkart
     kisisel = kisisel_bilgi_cikart(cv_metni)
+    aday_adi = kisisel.get("Ad Soyad", "Bilinmiyor")
 
     # Kişisel bilgileri düzenli göster
     with st.container(border=True):
@@ -384,36 +385,46 @@ if uploaded_file is not None:
         else:
             st.info("CV'den kişisel bilgi algılanamadı.")
 
-    # Not alanı
-    not_metni = st.text_area(
-        "Adaya dair notlarınızı buraya yazın:",
+    # Not alanı — session state ile anında kaydedilir
+    if "not_metni" not in st.session_state:
+        st.session_state.not_metni = ""
+
+    st.session_state.not_metni = st.text_area(
+        "Adaya dair notlarınızı buraya yazın (otomatik kaydedilir):",
+        value=st.session_state.not_metni,
         placeholder="Örn: Mülakat için uygun, deneyimi yeterli ancak Python bilgisi zayıf...",
         height=150
     )
 
     # TXT içeriği oluştur
     tarih = datetime.now().strftime("%d.%m.%Y %H:%M")
-    aday_adi = kisisel.get("Ad Soyad", "Bilinmiyor")
+    dosya_tarih = datetime.now().strftime("%d.%m.%Y_%H.%M.%S")
+    dosya_adi = f"{aday_adi.replace(' ', '_')}_{dosya_tarih}.txt"
 
-    txt_icerik = "============================================================\n"
-    txt_icerik += "ADAY DEĞERLENDİRME NOTU\n"
-    txt_icerik += f"Tarih: {tarih}\n"
+    txt_icerik  = "============================================================\n"
+    txt_icerik += "           ADAY DEGERLENDİRME NOTU\n"
+    txt_icerik += f"           Tarih: {tarih}\n"
     txt_icerik += "============================================================\n\n"
-    txt_icerik += "--- KİŞİSEL BİLGİLER ---\n"
-    for anahtar, deger in kisisel.items():
-        txt_icerik += f"{anahtar}: {deger}\n"
-    txt_icerik += "\n--- ANALİZ SONUÇLARI ---\n"
-    txt_icerik += f"Uyumluluk Puani : {puan}/100\n"
-    txt_icerik += f"Bulunan Yetenekler: {', '.join(bulunanlar) if bulunanlar else 'Yok'}\n"
-    txt_icerik += f"Eksik Yetenekler  : {', '.join(eksikler) if eksikler else 'Yok'}\n"
-    txt_icerik += "\n--- DEGERLENDİRME ---\n"
-    txt_icerik += ("Mulakata cagrilabilir\n" if puan >= 70 else
-                   "Degerlendirilebilir\n" if puan >= 40 else "Kriterlere uygun degil\n")
-    txt_icerik += "\n--- NOT ---\n"
-    txt_icerik += (not_metni if not_metni.strip() else "(Not girilmedi)")
-    txt_icerik += "\n\n============================================================\n"
 
-    dosya_adi = f"aday_notu_{aday_adi.replace(' ', '_')}_{datetime.now().strftime('%Y%m%d_%H%M')}.txt"
+    txt_icerik += "--- KİSİSEL BİLGİLER ---\n"
+    for anahtar, deger in kisisel.items():
+        txt_icerik += f"  {anahtar:15}: {deger}\n"
+
+    txt_icerik += "\n--- ANALİZ SONUÇLARI ---\n"
+    txt_icerik += f"  Uyumluluk Puani   : {puan}/100\n"
+    txt_icerik += f"  Bulunan Yetenekler: {', '.join(bulunanlar) if bulunanlar else 'Yok'}\n"
+    txt_icerik += f"  Eksik Yetenekler  : {', '.join(eksikler) if eksikler else 'Yok'}\n"
+
+    txt_icerik += "\n--- DEGERLENDİRME ---\n"
+    txt_icerik += ("  >> Mulakata cagrilabilir\n" if puan >= 70 else
+                   "  >> Degerlendirilebilir, ek mulakat onerilir\n" if puan >= 40 else
+                   "  >> Kriterlere uygun degil\n")
+
+    txt_icerik += "\n" + "=" * 60 + "\n"
+    txt_icerik += "                        N O T\n"
+    txt_icerik += "=" * 60 + "\n\n"
+    txt_icerik += (st.session_state.not_metni if st.session_state.not_metni.strip() else "(Not girilmedi)")
+    txt_icerik += "\n\n" + "=" * 60 + "\n"
 
     st.download_button(
         label="💾 Notu TXT Olarak İndir",
