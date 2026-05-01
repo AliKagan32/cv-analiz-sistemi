@@ -143,13 +143,13 @@ def kisisel_bilgi_cikart(cv_metni):
     bilgiler = {}
     satirlar = cv_metni.split('\n')
 
-    for satir in satirlar[:15]:
-        satir = satir.strip()
-        if "ad soyad" in satir.lower():
-            parcalar = satir.split(":")
-            if len(parcalar) >= 2:
-                bilgiler["Ad Soyad"] = parcalar[-1].strip()
-                break
+       for satir in satirlar[:15]:
+            satir = satir.strip()
+            if "ad soyad" in satir.lower() and ":" in satir:
+                isim = satir.split(":")[-1].strip()
+                if isim:
+                    bilgiler["Ad Soyad"] = isim
+                    break
 
     tel = re.search(r'(\+?90[\s\-]?)?(\(?\d{3}\)?[\s\-]?\d{3}[\s\-]?\d{2}[\s\-]?\d{2})', cv_metni)
     if tel:
