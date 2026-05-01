@@ -308,7 +308,7 @@ if uploaded_file is not None:
         st.text(cv_metni)
     st.success("✅ CV Başarıyla Yüklendi!")
     cv_metni = cv_metnini_oku(uploaded_file)
-st.write("İlk 10 satır:", cv_metni.split('\n')[:10])
+    st.write("İlk 10 satır:", cv_metni.split('\n')[:10])
     egitim_kriterler = {
         "ortaogretim": st.session_state.ortaogretim_okullar,
         "onlisans": st.session_state.onlisans_okullar,
