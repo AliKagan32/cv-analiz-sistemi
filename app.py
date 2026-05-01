@@ -140,41 +140,34 @@ def cv_metnini_oku(pdf_file):
         return "CV okunamadı!"
 
 def kisisel_bilgi_cikart(cv_metni):
-    """CV'den isim, TC, telefon gibi temel bilgileri çıkartır."""
     bilgiler = {}
-
     satirlar = cv_metni.split('\n')
 
-    # İsim — genellikle ilk birkaç satırda geçer
-    for satir in satirlar[:10]:
+    for satir in satirlar[:15]:
         satir = satir.strip()
-        if satir and len(satir.split()) >= 2 and len(satir) < 50:
-            # Sadece harf ve boşluk içeren satır isim adayı
-            if re.match(r'^[A-Za-zÇçĞğİıÖöŞşÜü\s]+$', satir):
-                bilgiler["Ad Soyad"] = satir
+        if "ad soyad" in satir.lower():
+            parcalar = satir.split(":")
+            if len(parcalar) >= 2:
+                bilgiler["Ad Soyad"] = parcalar[-1].strip()
                 break
 
-    # Telefon
     tel = re.search(r'(\+?90[\s\-]?)?(\(?\d{3}\)?[\s\-]?\d{3}[\s\-]?\d{2}[\s\-]?\d{2})', cv_metni)
     if tel:
         bilgiler["Telefon"] = tel.group(0).strip()
 
-    # TC Kimlik No (11 haneli sayı)
     tc = re.search(r'\b[1-9][0-9]{10}\b', cv_metni)
     if tc:
         bilgiler["TC Kimlik No"] = tc.group(0)
 
-    # E-posta
     email = re.search(r'[\w\.-]+@[\w\.-]+\.\w+', cv_metni)
     if email:
         bilgiler["E-posta"] = email.group(0)
 
-    # Doğum tarihi
     dogum = re.search(r'\b(\d{2}[.\/\-]\d{2}[.\/\-]\d{4})\b', cv_metni)
     if dogum:
         bilgiler["Doğum Tarihi"] = dogum.group(0)
 
-    return bilgiler
+    return bilgiler   
 
 def cv_analiz_et(cv_metni, kriterler, min_deneyim, min_egitim, egitim_kriterler,
                  basari_gerekli, arastirma_gerekli, proje_gerekli):
